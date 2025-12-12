@@ -20,10 +20,9 @@ namespace InventoryManagementSystem.Models
         [Required]
         public int QuantityAfter { get; set; }
 
-        public int QuantityDifference => QuantityAfter - QuantityBefore;
+//        public int QuantityDifference => QuantityAfter - QuantityBefore;
 
-        [Required]
-        [StringLength(50)]
+        [StringLength(20)]
         public string AdjustmentType { get; set; } // 'COUNT', 'DAMAGE', 'LOSS', 'GAIN'
 
         [StringLength(500)]

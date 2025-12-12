@@ -23,11 +23,25 @@ namespace InventoryManagementSystem.Data
         public DbSet<SalesOrderDetail> SalesOrderDetails { get; set; }
         public DbSet<StockTransaction> StockTransactions { get; set; }
         public DbSet<InventoryAdjustment> InventoryAdjustments { get; set; }
-
+        public DbSet<Bin> Bins { get; set; }
+        public DbSet<ProductBinning> ProductBinnings { get; set; }
+        public DbSet<ProductSerials> ProductSerials { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<UserPermission> UserPermissions { get; set; }
+        public DbSet<UnitOfMeasure> UnitsOfMeasure { get; set; }
+        public DbSet<SystemConfiguration> SystemConfigurations { get; set; }
+        public DbSet<SupplierPerformance> SupplierPerformances { get; set; }
+        public DbSet<ScheduledReport> ScheduledReports { get; set; }
+        public DbSet<InventoryValuation> InventoryValuations { get; set; }
+        public DbSet<InventoryAuditLog> InventoryAuditLogs { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
+            
+            modelBuilder.Entity<Bin>()
+                .HasIndex(b => new { b.WarehouseID, b.BinCode })
+                .IsUnique();
             // Product Configuration
             modelBuilder.Entity<Product>()
                 .HasIndex(p => p.ProductCode)

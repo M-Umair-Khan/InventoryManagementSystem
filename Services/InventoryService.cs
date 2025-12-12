@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 using InventoryManagementSystem.Data;
 using InventoryManagementSystem.Models;
 using System.Collections.Generic;
@@ -29,10 +30,15 @@ namespace InventoryManagementSystem.Services
         public async Task<Inventory> GetInventoryByProductAndWarehouseAsync(int productId, int warehouseId)
         {
 //            return await _context.Inventories
+//            return await _context.Inventory
+//                .Include(i => i.Product)
+//                .Include(i => i.Warehouse)
+//                .FirstOrDefaultAsync(i => i.ProductID == productId && i.WarehouseID == warehouseId);
             return await _context.Inventory
                 .Include(i => i.Product)
                 .Include(i => i.Warehouse)
                 .FirstOrDefaultAsync(i => i.ProductID == productId && i.WarehouseID == warehouseId);
+
         }
 
         public async Task<Inventory> UpdateInventoryAsync(int productId, int warehouseId, int quantityChange, string transactionType)
@@ -41,7 +47,6 @@ namespace InventoryManagementSystem.Services
 
             if (inventory == null)
             {
-                // Create new inventory record if it doesn't exist
                 inventory = new Inventory
                 {
                     ProductID = productId,
@@ -49,10 +54,8 @@ namespace InventoryManagementSystem.Services
                     QuantityOnHand = 0,
                     QuantityReserved = 0
                 };
-  //              _context.Inventories.Add(inventory);
                 _context.Inventory.Add(inventory);
             }
-
             // Update quantities based on transaction type
             switch (transactionType.ToUpper())
             {
@@ -82,11 +85,10 @@ namespace InventoryManagementSystem.Services
 
         public async Task<List<Inventory>> GetLowStockInventoryAsync()
         {
-//            return await _context.Inventories
             return await _context.Inventory
                 .Include(i => i.Product)
                 .Include(i => i.Warehouse)
-                .Where(i => i.QuantityAvailable <= i.Product.ReorderLevel && i.Product.IsActive)
+                .Where(i => i.QuantityAvailable <= i.Product.ReorderLevel && i.Product.IsActive == true)
                 .ToListAsync();
         }
     }

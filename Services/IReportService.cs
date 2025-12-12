@@ -14,7 +14,7 @@ namespace InventoryManagementSystem.Services
         Task<List<DeadStockReport>> GetDeadStockReportAsync();
         Task<List<SupplierPerformanceReport>> GetSupplierPerformanceReportAsync();
     }
-
+    // Add this to IReportService.cs or create separate file
     // 报告模型类（需要创建）
     public class ReorderRecommendation
     {

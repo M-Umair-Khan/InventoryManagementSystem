@@ -105,8 +105,8 @@ namespace InventoryManagementSystem.Services
         {
             var year = DateTime.Now.Year;
             var month = DateTime.Now.Month.ToString("D2");
-            var count = _context.SalesOrders.Count(so => so.OrderDate.Year == year && so.OrderDate.Month == DateTime.Now.Month) + 1;
-            return $"SO-{year}{month}-{count.ToString("D4")}";
+            var count = _context.SalesOrders.Count(so => so.OrderDate.HasValue && so.OrderDate.Value.Year == year && so.OrderDate.HasValue && so.OrderDate.Value.Month == DateTime.Now.Month) + 1;
+                return $"SO-{year}{month}-{count.ToString("D4")}";
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 using InventoryManagementSystem.Data;
 using InventoryManagementSystem.Models;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace InventoryManagementSystem.Services
                 .Include(p => p.Supplier)
                 .Include(p => p.Inventories)
                 .ThenInclude(i => i.Warehouse)
-                .Where(p => p.IsActive)
+                .Where(p => p.IsActive == true)
                 .OrderBy(p => p.ProductName)
                 .ToListAsync();
         }
@@ -45,7 +46,7 @@ namespace InventoryManagementSystem.Services
             await _context.SaveChangesAsync();
 
             // Initialize inventory for all warehouses
-            var warehouses = await _context.Warehouses.Where(w => w.IsActive).ToListAsync();
+            var warehouses = await _context.Warehouses.Where(w => w.IsActive == true).ToListAsync();
             foreach (var warehouse in warehouses)
             {
                 var inventory = new Inventory
@@ -85,9 +86,8 @@ namespace InventoryManagementSystem.Services
         {
             return await _context.Products
                 .Include(p => p.Inventories)
-                .Where(p => p.IsActive &&
-                    p.Inventories.Any(i => i.QuantityAvailable <= p.ReorderLevel))
-                .ToListAsync();
+                .Where(p => p.IsActive == true && p.Inventories.Any(i => i.QuantityAvailable <= p.ReorderLevel))
+            .ToListAsync();
         }
     }
 }

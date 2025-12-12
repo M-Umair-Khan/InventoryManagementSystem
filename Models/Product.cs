@@ -41,16 +41,24 @@ namespace InventoryManagementSystem.Models
         public decimal CostPrice { get; set; }
 
         [Display(Name = "Reorder Level")]
-        public int ReorderLevel { get; set; } = 10;
+        public int? ReorderLevel { get; set; } = 10;
 
         [Display(Name = "Reorder Quantity")]
-        public int ReorderQuantity { get; set; } = 50;
+        public int? ReorderQuantity { get; set; } = 50;
 
         [Display(Name = "Active")]
-        public bool IsActive { get; set; } = true;
+        public bool? IsActive { get; set; } = true;
 
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime? CreatedDate { get; set; } = DateTime.Now;
         public DateTime? UpdatedDate { get; set; }
+        [Column(TypeName = "decimal(8,2)")]
+        public decimal? Weight { get; set; }
+
+        [StringLength(50)]
+        public string Dimensions { get; set; }
+
+        [Display(Name = "Expiry Date")]
+        public DateTime? ExpiryDate { get; set; }
 
         // Navigation Properties
         public virtual Category Category { get; set; }

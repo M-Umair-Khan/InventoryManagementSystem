@@ -15,12 +15,14 @@ namespace InventoryManagementSystem.Models
         [Display(Name = "SO Number")]
         public string SONumber { get; set; }
 
+        public int? CustomerID { get; set; }
+
         [StringLength(100)]
         [Display(Name = "Customer Name")]
         public string CustomerName { get; set; }
 
         [Display(Name = "Order Date")]
-        public DateTime OrderDate { get; set; } = DateTime.Now;
+        public DateTime? OrderDate { get; set; } = DateTime.Now;
 
         [Display(Name = "Required Date")]
         public DateTime? RequiredDate { get; set; }
@@ -33,7 +35,7 @@ namespace InventoryManagementSystem.Models
 
         [Column(TypeName = "decimal(12,2)")]
         [Display(Name = "Total Amount")]
-        public decimal TotalAmount { get; set; }
+        public decimal? TotalAmount { get; set; } = 0;
 
         [StringLength(255)]
         [Display(Name = "Shipping Address")]
@@ -67,7 +69,7 @@ namespace InventoryManagementSystem.Models
         public int QuantityOrdered { get; set; }
 
         [Display(Name = "Quantity Shipped")]
-        public int QuantityShipped { get; set; } = 0;
+        public int? QuantityShipped { get; set; } = 0;
 
         [Column(TypeName = "decimal(10,2)")]
         [Display(Name = "Unit Price")]
@@ -75,7 +77,7 @@ namespace InventoryManagementSystem.Models
 
         [Column(TypeName = "decimal(5,2)")]
         [Display(Name = "Discount %")]
-        public decimal DiscountPercent { get; set; } = 0;
+        public decimal? DiscountPercent { get; set; } = 0;
 
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         [Column(TypeName = "decimal(10,2)")]

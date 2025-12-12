@@ -19,7 +19,7 @@ namespace InventoryManagementSystem.Services
         public async Task<List<Supplier>> GetAllSuppliersAsync()
         {
             return await _context.Suppliers
-                .Where(s => s.IsActive)
+                .Where(s => s.IsActive == true)
                 .OrderBy(s => s.SupplierName)
                 .ToListAsync();
         }

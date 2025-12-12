@@ -34,9 +34,9 @@ namespace InventoryManagementSystem.Models
         public string Country { get; set; }
 
         [Display(Name = "Active")]
-        public bool IsActive { get; set; } = true;
+        public bool? IsActive { get; set; } = true;
 
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime? CreatedDate { get; set; } = DateTime.Now;
         public DateTime? UpdatedDate { get; set; }
 
         // Navigation Properties

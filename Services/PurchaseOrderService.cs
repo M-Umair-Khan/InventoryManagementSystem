@@ -61,12 +61,19 @@ namespace InventoryManagementSystem.Services
         {
             var order = await GetPurchaseOrderByIdAsync(orderId);
             if (order == null) return false;
-
+            bool anyUpdates = false;
             foreach (var item in receivedItems)
             {
                 var detail = order.PurchaseOrderDetails.FirstOrDefault(pod => pod.PODetailID == item.PODetailID);
-                if (detail != null)
+                if (detail != null && item.QuantityReceived.HasValue)
                 {
+                    // Ensure quantity received is valid (non-negative and not exceeding ordered)
+                    int quantityReceived = item.QuantityReceived.Value;
+                    if (quantityReceived < 0)
+                        quantityReceived = 0;
+                    if (quantityReceived > detail.QuantityOrdered)
+                        quantityReceived = detail.QuantityOrdered;
+
                     detail.QuantityReceived = item.QuantityReceived;
                     detail.ReceivedDate = DateTime.Now;
 
@@ -74,11 +81,13 @@ namespace InventoryManagementSystem.Services
                     await _inventoryService.UpdateInventoryAsync(
                         detail.ProductID,
                         1, // Default warehouse ID - should be configurable
-                        item.QuantityReceived,
+                        quantityReceived,
                         "PURCHASE"
                     );
+                    anyUpdates = true;
                 }
             }
+            if (!anyUpdates) return false;
 
             // Check if all items received
             if (order.PurchaseOrderDetails.All(pod => pod.QuantityReceived >= pod.QuantityOrdered))
@@ -99,8 +108,8 @@ namespace InventoryManagementSystem.Services
         {
             var year = DateTime.Now.Year;
             var month = DateTime.Now.Month.ToString("D2");
-            var count = _context.PurchaseOrders.Count(po => po.OrderDate.Year == year && po.OrderDate.Month == DateTime.Now.Month) + 1;
-            return $"PO-{year}{month}-{count.ToString("D4")}";
+            var count = _context.PurchaseOrders.Count(po => po.OrderDate.HasValue && po.OrderDate.Value.Year == year && po.OrderDate.HasValue && po.OrderDate.Value.Month== DateTime.Now.Month) + 1;
+                return $"PO-{year}{month}-{count.ToString("D4")}";
         }
     }
 }

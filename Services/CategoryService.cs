@@ -22,7 +22,7 @@ namespace InventoryManagementSystem.Services
                 .Include(c => c.ParentCategory)
                 .Include(c => c.ChildCategories)
                 .Include(c => c.Products)
-                .Where(c => c.IsActive)
+                .Where(c => c.IsActive == true) // Handle nullable boolean
                 .OrderBy(c => c.CategoryName)
                 .ToListAsync();
         }
@@ -38,7 +38,9 @@ namespace InventoryManagementSystem.Services
 
         public async Task<Category> CreateCategoryAsync(Category category)
         {
-            category.CreatedDate = DateTime.Now;
+            // Ensure IsActive is set (nullable in DB, non-null in service)
+            category.IsActive = true;
+
             _context.Categories.Add(category);
             await _context.SaveChangesAsync();
             return category;
@@ -46,7 +48,6 @@ namespace InventoryManagementSystem.Services
 
         public async Task<Category> UpdateCategoryAsync(Category category)
         {
-            category.UpdatedDate = DateTime.Now;
             _context.Categories.Update(category);
             await _context.SaveChangesAsync();
             return category;
@@ -60,15 +61,15 @@ namespace InventoryManagementSystem.Services
 
             if (category == null) return false;
 
-            // Check if category has products
-            if (category.Products != null && category.Products.Any(p => p.IsActive))
+            // Check if category has active products
+            if (category.Products != null && category.Products.Any(p => p.IsActive == true))
             {
                 return false; // Cannot delete category with active products
             }
 
-            // Check if category has child categories
+            // Check if category has active child categories
             var hasActiveChildCategories = await _context.Categories
-                .AnyAsync(c => c.ParentCategoryID == id && c.IsActive);
+                .AnyAsync(c => c.ParentCategoryID == id && c.IsActive == true);
 
             if (hasActiveChildCategories)
             {
@@ -77,7 +78,6 @@ namespace InventoryManagementSystem.Services
 
             // Soft delete
             category.IsActive = false;
-            category.UpdatedDate = DateTime.Now;
             await _context.SaveChangesAsync();
             return true;
         }
@@ -85,7 +85,7 @@ namespace InventoryManagementSystem.Services
         public async Task<List<Category>> GetParentCategoryOptionsAsync(int? excludeCategoryId = null)
         {
             var query = _context.Categories
-                .Where(c => c.IsActive);
+                .Where(c => c.IsActive == true);
 
             if (excludeCategoryId.HasValue)
             {
@@ -109,7 +109,7 @@ namespace InventoryManagementSystem.Services
         private async Task GetDescendantIdsRecursiveAsync(int parentId, List<int> ids)
         {
             var childIds = await _context.Categories
-                .Where(c => c.ParentCategoryID == parentId && c.IsActive)
+                .Where(c => c.ParentCategoryID == parentId && c.IsActive == true)
                 .Select(c => c.CategoryID)
                 .ToListAsync();
 
@@ -126,7 +126,7 @@ namespace InventoryManagementSystem.Services
         public async Task<List<Category>> GetChildCategoriesAsync(int parentCategoryId)
         {
             return await _context.Categories
-                .Where(c => c.ParentCategoryID == parentCategoryId && c.IsActive)
+                .Where(c => c.ParentCategoryID == parentCategoryId && c.IsActive == true)
                 .Include(c => c.Products)
                 .OrderBy(c => c.CategoryName)
                 .ToListAsync();
@@ -137,7 +137,7 @@ namespace InventoryManagementSystem.Services
             return await _context.Categories
                 .Include(c => c.ParentCategory)
                 .Include(c => c.Products)
-                .Where(c => c.IsActive)
+                .Where(c => c.IsActive == true)
                 .Select(c => new CategoryWithProductCount
                 {
                     CategoryID = c.CategoryID,
@@ -145,8 +145,8 @@ namespace InventoryManagementSystem.Services
                     Description = c.Description,
                     ParentCategoryID = c.ParentCategoryID,
                     ParentCategoryName = c.ParentCategory != null ? c.ParentCategory.CategoryName : null,
-                    ProductCount = c.Products.Count(p => p.IsActive),
-                    IsActive = c.IsActive
+                    ProductCount = c.Products.Count(p => p.IsActive == true),
+                    IsActive = c.IsActive ?? false
                 })
                 .OrderBy(c => c.CategoryName)
                 .ToListAsync();
@@ -171,7 +171,7 @@ namespace InventoryManagementSystem.Services
         public async Task<List<CategoryHierarchy>> GetCategoryHierarchyAsync()
         {
             var categories = await _context.Categories
-                .Where(c => c.IsActive)
+                .Where(c => c.IsActive == true)
                 .Include(c => c.Products)
                 .ToListAsync();
 
@@ -196,7 +196,7 @@ namespace InventoryManagementSystem.Services
             {
                 CategoryID = category.CategoryID,
                 CategoryName = category.CategoryName,
-                ProductCount = category.Products.Count(p => p.IsActive),
+                ProductCount = category.Products.Count(p => p.IsActive == true),
                 Description = category.Description,
                 Children = new List<CategoryHierarchy>()
             };
@@ -212,6 +212,134 @@ namespace InventoryManagementSystem.Services
             }
 
             return hierarchy;
+        }
+
+        /// <summary>
+        /// Get all active categories (simple list without includes)
+        /// </summary>
+        public async Task<List<Category>> GetActiveCategoriesAsync()
+        {
+            return await _context.Categories
+                .Where(c => c.IsActive == true)
+                .OrderBy(c => c.CategoryName)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Get categories that have no parent (root categories)
+        /// </summary>
+        public async Task<List<Category>> GetRootCategoriesAsync()
+        {
+            return await _context.Categories
+                .Where(c => c.ParentCategoryID == null && c.IsActive == true)
+                .OrderBy(c => c.CategoryName)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Check if category can be deleted (no products or child categories)
+        /// </summary>
+        public async Task<bool> CanDeleteCategoryAsync(int categoryId)
+        {
+            var category = await _context.Categories
+                .Include(c => c.Products)
+                .FirstOrDefaultAsync(c => c.CategoryID == categoryId);
+
+            if (category == null) return false;
+
+            // Check for active products
+            if (category.Products != null && category.Products.Any(p => p.IsActive == true))
+            {
+                return false;
+            }
+
+            // Check for active child categories
+            var hasActiveChildren = await _context.Categories
+                .AnyAsync(c => c.ParentCategoryID == categoryId && c.IsActive == true);
+
+            return !hasActiveChildren;
+        }
+
+        /// <summary>
+        /// Get category with all descendants
+        /// </summary>
+        public async Task<List<Category>> GetCategoryWithDescendantsAsync(int categoryId)
+        {
+            var category = await GetCategoryByIdAsync(categoryId);
+            if (category == null) return new List<Category>();
+
+            var allCategories = new List<Category> { category };
+            await GetDescendantsRecursiveAsync(categoryId, allCategories);
+            return allCategories;
+        }
+
+        private async Task GetDescendantsRecursiveAsync(int parentId, List<Category> categories)
+        {
+            var childCategories = await _context.Categories
+                .Where(c => c.ParentCategoryID == parentId && c.IsActive == true)
+                .ToListAsync();
+
+            if (childCategories.Any())
+            {
+                categories.AddRange(childCategories);
+                foreach (var child in childCategories)
+                {
+                    await GetDescendantsRecursiveAsync(child.CategoryID, categories);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get breadcrumb path for a category
+        /// </summary>
+        public async Task<List<Category>> GetCategoryBreadcrumbAsync(int categoryId)
+        {
+            var breadcrumb = new List<Category>();
+            await BuildBreadcrumbRecursiveAsync(categoryId, breadcrumb);
+            return breadcrumb.Reverse<Category>().ToList();
+        }
+
+        private async Task BuildBreadcrumbRecursiveAsync(int categoryId, List<Category> breadcrumb)
+        {
+            var category = await _context.Categories
+                .FirstOrDefaultAsync(c => c.CategoryID == categoryId);
+
+            if (category != null)
+            {
+                breadcrumb.Add(category);
+                if (category.ParentCategoryID.HasValue)
+                {
+                    await BuildBreadcrumbRecursiveAsync(category.ParentCategoryID.Value, breadcrumb);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Count total categories (active and inactive)
+        /// </summary>
+        public async Task<int> GetTotalCategoriesCountAsync()
+        {
+            return await _context.Categories.CountAsync();
+        }
+
+        /// <summary>
+        /// Count active categories
+        /// </summary>
+        public async Task<int> GetActiveCategoriesCountAsync()
+        {
+            return await _context.Categories.CountAsync(c => c.IsActive == true);
+        }
+
+        /// <summary>
+        /// Get categories that have products
+        /// </summary>
+        public async Task<List<Category>> GetCategoriesWithProductsAsync()
+        {
+            return await _context.Categories
+                .Where(c => c.IsActive == true && c.Products.Any(p => p.IsActive == true))
+                .Include(c => c.Products)
+                .OrderBy(c => c.CategoryName)
+                .ToListAsync();
         }
     }
 
