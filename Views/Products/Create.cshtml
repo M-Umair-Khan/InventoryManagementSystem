@@ -1,0 +1,159 @@
+﻿@using InventoryManagementSystem.Models
+@model Product
+@{
+    ViewData["Title"] = "Create Product";
+    var categories = ViewBag.Categories as List<Category>;
+    var suppliers = ViewBag.Suppliers as List<Supplier>;
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Create New Product</h1>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Product Information</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="ProductCode" class="control-label"></label>
+                                    <input asp-for="ProductCode" class="form-control" />
+                                    <span asp-validation-for="ProductCode" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="ProductName" class="control-label"></label>
+                                    <input asp-for="ProductName" class="form-control" />
+                                    <span asp-validation-for="ProductName" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Description" class="control-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="CategoryID" class="control-label"></label>
+                                    <select asp-for="CategoryID" class="form-control"
+                                            asp-items="@(new SelectList(categories, "CategoryID", "CategoryName"))">
+                                        <option value="">-- Select Category --</option>
+                                    </select>
+                                    <span asp-validation-for="CategoryID" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="SupplierID" class="control-label"></label>
+                                    <select asp-for="SupplierID" class="form-control"
+                                            asp-items="@(new SelectList(suppliers, "SupplierID", "SupplierName"))">
+                                        <option value="">-- Select Supplier --</option>
+                                    </select>
+                                    <span asp-validation-for="SupplierID" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="UnitPrice" class="control-label"></label>
+                                    <input asp-for="UnitPrice" class="form-control" type="number" step="0.01" />
+                                    <span asp-validation-for="UnitPrice" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="CostPrice" class="control-label"></label>
+                                    <input asp-for="CostPrice" class="form-control" type="number" step="0.01" />
+                                    <span asp-validation-for="CostPrice" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label asp-for="ReorderLevel" class="control-label"></label>
+                                    <input asp-for="ReorderLevel" class="form-control" />
+                                    <span asp-validation-for="ReorderLevel" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label asp-for="ReorderQuantity" class="control-label"></label>
+                                    <input asp-for="ReorderQuantity" class="form-control" />
+                                    <span asp-validation-for="ReorderQuantity" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group form-check">
+                            <input class="form-check-input" asp-for="IsActive" />
+                            <label class="form-check-label" asp-for="IsActive"></label>
+                        </div>
+
+                        <div class="form-group">
+                            <input type="submit" value="Create" class="btn btn-primary" />
+                            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a asp-controller="Categories" asp-action="Create" class="list-group-item list-group-item-action">
+                            <i class="fas fa-plus fa-fw mr-2"></i> Add New Category
+                        </a>
+                        <a asp-controller="Suppliers" asp-action="Create" class="list-group-item list-group-item-action">
+                            <i class="fas fa-truck fa-fw mr-2"></i> Add New Supplier
+                        </a>
+                        <a asp-controller="PurchaseOrders" asp-action="Create" class="list-group-item list-group-item-action">
+                            <i class="fas fa-shopping-cart fa-fw mr-2"></i> Create Purchase Order
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Tips</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Use unique product codes</li>
+                        <li>Set realistic reorder levels</li>
+                        <li>Update cost and selling prices regularly</li>
+                        <li>Assign products to appropriate categories</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

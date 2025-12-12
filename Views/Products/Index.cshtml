@@ -1,0 +1,104 @@
+﻿@model IEnumerable<Product>
+@{
+    ViewData["Title"] = "Products";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Products</h1>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add New Product
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Product List</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="productTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Supplier</th>
+                            <th>Unit Price</th>
+                            <th>Cost Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            var totalStock = item.Inventories?.Sum(i => i.QuantityAvailable) ?? 0;
+                            <tr>
+                                <td>@item.ProductCode</td>
+                                <td>@item.ProductName</td>
+                                <td>@item.Category?.CategoryName</td>
+                                <td>@item.Supplier?.SupplierName</td>
+                                <td class="text-right">@item.UnitPrice.ToString("C")</td>
+                                <td class="text-right">@item.CostPrice.ToString("C")</td>
+                                <td class="text-center">
+                                    @if (totalStock <= item.ReorderLevel)
+                                    {
+                                        <span class="badge bg-danger">@totalStock</span>
+                                    }
+                                    else if (totalStock <= item.ReorderLevel * 2)
+                                    {
+                                        <span class="badge bg-warning">@totalStock</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">@totalStock</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.IsActive)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Details" asp-route-id="@item.ProductID"
+                                           class="btn btn-sm btn-info" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.ProductID"
+                                           class="btn btn-sm btn-warning" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.ProductID"
+                                           class="btn btn-sm btn-danger" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#productTable').DataTable({
+                order: [[1, 'asc']],
+                pageLength: 10,
+                responsive: true
+            });
+        });
+    </script>
+}

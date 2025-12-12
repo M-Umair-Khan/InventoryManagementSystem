@@ -1,0 +1,225 @@
+﻿@using InventoryManagementSystem.Models.ViewModels
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Inventory Dashboard";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Inventory Dashboard</h1>
+
+    <!-- Summary Cards -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small">Total Products</div>
+                            <div class="h4">@Model.TotalProducts</div>
+                        </div>
+                        <i class="fas fa-box fa-2x"></i>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" asp-controller="Products" asp-action="Index">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small">Low Stock Items</div>
+                            <div class="h4">@Model.LowStockItems</div>
+                        </div>
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" asp-controller="Reports" asp-action="Reorder">Reorder Recommendations</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small">Inventory Value</div>
+                            <div class="h4">@Model.TotalInventoryValue.ToString("C")</div>
+                        </div>
+                        <i class="fas fa-dollar-sign fa-2x"></i>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" asp-controller="Reports" asp-action="InventoryValuation">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small">Pending Orders</div>
+                            <div class="h4">@Model.PendingPurchaseOrders</div>
+                        </div>
+                        <i class="fas fa-clipboard-list fa-2x"></i>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" asp-controller="PurchaseOrders" asp-action="Index">View Purchase Orders</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Tables -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Recent Sales
+                </div>
+                <div class="card-body">
+                    <canvas id="salesChart" width="100%" height="40"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-pie me-1"></i>
+                    Inventory by Category
+                </div>
+                <div class="card-body">
+                    <canvas id="inventoryChart" width="100%" height="40"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Low Stock Products -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-exclamation-circle me-1"></i>
+            Low Stock Products
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="lowStockTable">
+                    <thead>
+                        <tr>
+                            <th>Product Code</th>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Current Stock</th>
+                            <th>Reorder Level</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in Model.LowStockProducts)
+                        {
+                            var inventory = product.Inventories?.FirstOrDefault();
+                            <tr>
+                                <td>@product.ProductCode</td>
+                                <td>@product.ProductName</td>
+                                <td>@product.Category?.CategoryName</td>
+                                <td>@(inventory?.QuantityAvailable ?? 0)</td>
+                                <td>@product.ReorderLevel</td>
+                                <td>
+                                    <span class="badge bg-danger">Low Stock</span>
+                                </td>
+                                <td>
+                                    <a asp-controller="Products" asp-action="Details" asp-route-id="@product.ProductID" class="btn btn-sm btn-info">View</a>
+                                    <a asp-controller="PurchaseOrders" asp-action="Create" class="btn btn-sm btn-warning">Reorder</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script>
+        // Sales Chart
+        var salesCtx = document.getElementById('salesChart').getContext('2d');
+        var salesChart = new Chart(salesCtx, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.SalesChart?.Labels)),
+                datasets: [{
+                    label: 'Sales Revenue',
+                    data: @Html.Raw(Json.Serialize(Model.SalesChart?.Values)),
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Monthly Sales Trend'
+                    }
+                }
+            }
+        });
+
+        // Inventory Chart
+        var inventoryCtx = document.getElementById('inventoryChart').getContext('2d');
+        var inventoryChart = new Chart(inventoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Electronics', 'Office Supplies', 'Furniture', 'Software'],
+                datasets: [{
+                    data: [30, 25, 20, 25],
+                    backgroundColor: [
+                        'rgb(255, 99, 132)',
+                        'rgb(54, 162, 235)',
+                        'rgb(255, 205, 86)',
+                        'rgb(75, 192, 192)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Inventory Distribution'
+                    }
+                }
+            }
+        });
+
+        // Initialize DataTable
+        $(document).ready(function() {
+            $('#lowStockTable').DataTable({
+                pageLength: 5,
+                lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]]
+            });
+        });
+    </script>
+}
