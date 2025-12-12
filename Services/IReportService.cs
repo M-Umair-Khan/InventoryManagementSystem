@@ -13,6 +13,14 @@ namespace InventoryManagementSystem.Services
         Task<List<InventoryValuationReport>> GetInventoryValuationReportAsync();
         Task<List<DeadStockReport>> GetDeadStockReportAsync();
         Task<List<SupplierPerformanceReport>> GetSupplierPerformanceReportAsync();
+
+        // Additional methods
+        Task<List<SalesReport>> GetMonthlySalesReportAsync(int year, int month);
+        Task<decimal> GetTotalInventoryValueAsync();
+        Task<int> GetTotalActiveProductsAsync();
+        Task<int> GetTotalOutOfStockItemsAsync();
+        Task<Dictionary<string, int>> GetProductCountByCategoryAsync();
+        Task<List<SalesReport>> GetTopSellingProductsAsync(int topN = 10, DateTime? startDate = null, DateTime? endDate = null);
     }
     // Add this to IReportService.cs or create separate file
     // 报告模型类（需要创建）

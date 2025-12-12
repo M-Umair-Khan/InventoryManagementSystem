@@ -69,7 +69,7 @@ namespace InventoryManagementSystem.Models
         public int QuantityOrdered { get; set; }
 
         [Display(Name = "Quantity Shipped")]
-        public int? QuantityShipped { get; set; } = 0;
+        public int QuantityShipped { get; set; } = 0;
 
         [Column(TypeName = "decimal(10,2)")]
         [Display(Name = "Unit Price")]

@@ -12,7 +12,7 @@ namespace InventoryManagementSystem.Models
         [Required]
         [StringLength(50)]
         [Display(Name = "Category Name")]
-        public string CategoryName { get; set; }
+        public string? CategoryName { get; set; }
 
         [StringLength(255)]
         public string Description { get; set; }
