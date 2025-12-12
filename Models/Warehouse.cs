@@ -32,7 +32,7 @@ namespace InventoryManagementSystem.Models
         public string Phone { get; set; }
 
         [Display(Name = "Active")]
-        public bool IsActive { get; set; } = true;
+        public bool? IsActive { get; set; } = true;
 
         // Navigation Properties
         public virtual ICollection<Inventory> Inventories { get; set; }

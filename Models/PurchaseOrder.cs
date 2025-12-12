@@ -20,7 +20,7 @@ namespace InventoryManagementSystem.Models
         public int SupplierID { get; set; }
 
         [Display(Name = "Order Date")]
-        public DateTime OrderDate { get; set; } = DateTime.Now;
+        public DateTime? OrderDate { get; set; } = DateTime.Now;
 
         [Display(Name = "Expected Delivery")]
         public DateTime? ExpectedDeliveryDate { get; set; }
@@ -33,7 +33,7 @@ namespace InventoryManagementSystem.Models
 
         [Column(TypeName = "decimal(12,2)")]
         [Display(Name = "Total Amount")]
-        public decimal TotalAmount { get; set; }
+        public decimal? TotalAmount { get; set; } = 0;
 
         [StringLength(100)]
         [Display(Name = "Created By")]
@@ -68,7 +68,7 @@ namespace InventoryManagementSystem.Models
         public int QuantityOrdered { get; set; }
 
         [Display(Name = "Quantity Received")]
-        public int QuantityReceived { get; set; } = 0;
+        public int? QuantityReceived { get; set; } = 0;
 
         [Column(TypeName = "decimal(10,2)")]
         [Display(Name = "Unit Cost")]

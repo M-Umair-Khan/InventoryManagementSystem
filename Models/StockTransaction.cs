@@ -16,8 +16,9 @@ namespace InventoryManagementSystem.Models
         public int WarehouseID { get; set; }
 
         [Required]
-        [StringLength(50)]
+        [StringLength(20)]
         public string TransactionType { get; set; } // 'IN', 'OUT', 'ADJUST'
+
 
         public int Quantity { get; set; }
 
@@ -34,9 +35,25 @@ namespace InventoryManagementSystem.Models
 
         [StringLength(100)]
         public string CreatedBy { get; set; }
+        public int? ReferenceID { get; set; }
+
+        [StringLength(20)]
+        public string ReferenceType { get; set; }
+
+        [Column(TypeName = "decimal(10,2)")]
+        public decimal? UnitCost { get; set; }
+
+        [Column(TypeName = "decimal(12,2)")]
+        public decimal? TotalCost { get; set; }
+
+        [StringLength(500)]
+        public string Notes { get; set; }
 
         // Navigation Properties
         public virtual Product Product { get; set; }
         public virtual Warehouse Warehouse { get; set; }
+
+
+
     }
 }

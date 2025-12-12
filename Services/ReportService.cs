@@ -22,10 +22,10 @@ namespace InventoryManagementSystem.Services
         {
             var dashboard = new DashboardViewModel
             {
-                TotalProducts = await _context.Products.CountAsync(p => p.IsActive),
-                TotalCategories = await _context.Categories.CountAsync(c => c.IsActive),
-                TotalSuppliers = await _context.Suppliers.CountAsync(s => s.IsActive),
-                TotalWarehouses = await _context.Warehouses.CountAsync(w => w.IsActive),
+                TotalProducts = await _context.Products.CountAsync(p => p.IsActive == true),
+                TotalCategories = await _context.Categories.CountAsync(c => c.IsActive == true),
+                TotalSuppliers = await _context.Suppliers.CountAsync(s => s.IsActive == true),
+                TotalWarehouses = await _context.Warehouses.CountAsync(w => w.IsActive == true),
 
                 TotalInventoryValue = await _context.Inventory
                     .Include(i => i.Product)
@@ -33,7 +33,7 @@ namespace InventoryManagementSystem.Services
 
                 LowStockItems = await _context.Inventory
                     .Include(i => i.Product)
-                    .CountAsync(i => i.QuantityAvailable <= i.Product.ReorderLevel && i.Product.IsActive),
+                    .CountAsync(i => i.QuantityAvailable <= i.Product.ReorderLevel && i.Product.IsActive == true),
 
                 PendingPurchaseOrders = await _context.PurchaseOrders
                     .CountAsync(po => po.Status == "Pending"),
@@ -44,7 +44,7 @@ namespace InventoryManagementSystem.Services
                 LowStockProducts = await _context.Products
                     .Include(p => p.Category)
                     .Include(p => p.Inventories)
-                    .Where(p => p.IsActive &&
+                    .Where(p => p.IsActive == true &&
                         p.Inventories.Any(i => i.QuantityAvailable <= p.ReorderLevel))
                     .Take(10)
                     .ToListAsync(),
@@ -158,7 +158,8 @@ namespace InventoryManagementSystem.Services
                     LastMovementDate = _context.StockTransactions
                         .Where(st => st.ProductID == p.ProductID)
                         .Max(st => (DateTime?)st.TransactionDate) ?? p.CreatedDate,
-                    DaysInStock = (int)(DateTime.Now - (p.Inventories.FirstOrDefault().LastRestockDate ?? p.CreatedDate)).TotalDays
+//                    DaysInStock = (int)(DateTime.Now - (p.Inventories.FirstOrDefault().LastRestockDate ?? p.CreatedDate)).TotalDays
+                    DaysInStock = (int)(DateTime.Now - (p.Inventories.FirstOrDefault() != null? p.Inventories.FirstOrDefault().LastRestockDate ?? p.CreatedDate: p.CreatedDate)).TotalDays
                 })
                 .Where(r => r.LastMovementDate < sixMonthsAgo && r.QuantityOnHand > 0)
                 .OrderBy(r => r.LastMovementDate)

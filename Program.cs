@@ -42,18 +42,34 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 // Seed initial data (optional - for development)
+// In the seed data section, make it async:
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.EnsureCreated();
+    await dbContext.Database.EnsureCreatedAsync(); // Use async version
 
     // Seed initial data if tables are empty
     if (!dbContext.Categories.Any())
     {
         dbContext.Categories.AddRange(
-            new Category { CategoryName = "Electronics", Description = "Electronic items" },
-            new Category { CategoryName = "Office Supplies", Description = "Office stationery and supplies" },
-            new Category { CategoryName = "Furniture", Description = "Office furniture" }
+            new Category
+            {
+                CategoryName = "Electronics",
+                Description = "Electronic items",
+                IsActive = true
+            },
+            new Category
+            {
+                CategoryName = "Office Supplies",
+                Description = "Office stationery and supplies",
+                IsActive = true
+            },
+            new Category
+            {
+                CategoryName = "Furniture",
+                Description = "Office furniture",
+                IsActive = true
+            }
         );
         await dbContext.SaveChangesAsync();
     }
@@ -66,7 +82,8 @@ using (var scope = app.Services.CreateScope())
                 WarehouseCode = "WH01",
                 WarehouseName = "Main Warehouse",
                 Location = "123 Main St, City",
-                Capacity = 10000
+                Capacity = 10000,
+                IsActive = true
             }
         );
         await dbContext.SaveChangesAsync();

@@ -80,18 +80,27 @@ setTimeout(refreshDashboard, 300000);
 // Handle form submission with loading indicator
 document.addEventListener('submit', function (e) {
     const form = e.target;
+
+    // Check if it's a form that needs validation
     if (form.classList.contains('needs-validation')) {
         if (!form.checkValidity()) {
             e.preventDefault();
             e.stopPropagation();
+        } else {
+            // Only show loading indicator if form is valid
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn && !submitBtn.disabled) {
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                submitBtn.disabled = true;
+            }
         }
         form.classList.add('was-validated');
-    }
-
-    // Show loading indicator
-    const submitBtn = form.querySelector('button[type="submit"]');
-    if (submitBtn) {
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-        submitBtn.disabled = true;
+    } else {
+        // For forms without validation, still show loading but don't validate
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn && !submitBtn.disabled) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            submitBtn.disabled = true;
+        }
     }
 });

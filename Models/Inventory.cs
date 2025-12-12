@@ -21,11 +21,11 @@ namespace InventoryManagementSystem.Models
         public int QuantityOnHand { get; set; } = 0;
 
         [Display(Name = "Quantity Reserved")]
-        public int QuantityReserved { get; set; } = 0;
+        public int? QuantityReserved { get; set; } = 0;
 
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         [Display(Name = "Quantity Available")]
-        public int QuantityAvailable { get; private set; }
+        public int? QuantityAvailable { get; private set; }
 
         [Display(Name = "Last Stock Take")]
         public DateTime? LastStockTakeDate { get; set; }

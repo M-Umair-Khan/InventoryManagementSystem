@@ -24,6 +24,16 @@ namespace InventoryManagementSystem.Services
         Task<List<CategoryWithProductCount>> GetCategoriesWithProductCountAsync();
         /// Check if category name already exists
         Task<bool> CategoryNameExistsAsync(string categoryName, int? excludeCategoryId = null);
+        Task<List<CategoryHierarchy>> GetCategoryHierarchyAsync();
+        // New methods added
+        Task<List<Category>> GetActiveCategoriesAsync();
+        Task<List<Category>> GetRootCategoriesAsync();
+        Task<bool> CanDeleteCategoryAsync(int categoryId);
+        Task<List<Category>> GetCategoryWithDescendantsAsync(int categoryId);
+        Task<List<Category>> GetCategoryBreadcrumbAsync(int categoryId);
+        Task<int> GetTotalCategoriesCountAsync();
+        Task<int> GetActiveCategoriesCountAsync();
+        Task<List<Category>> GetCategoriesWithProductsAsync();
     }
     /// View model for categories with product count
     public class CategoryWithProductCount
